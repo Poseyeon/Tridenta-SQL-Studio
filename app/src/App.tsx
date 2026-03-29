@@ -1,121 +1,90 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState } from 'react';
+import '../main.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState('System ready. Connect to 127.0.0.1:5555.');
+    const [tables, setTables] = useState<string[]>([]);
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    const executeQuery = async (sql: string) => {
+        if (!sql.trim()) return;
+        setResults('Executing Query...');
+        
+        try {
+            // Call our Electron IPC handler
+            if ((window as any).api && (window as any).api.queryDB) {
+                const response = await (window as any).api.queryDB(sql);
+                setResults(response || "(No Output)");
+            } else {
+                setResults(`[Web View Only] Received:\n${sql}\n\nNote: Electron IPC (window.api.queryDB) not detected.\nPlease add it to your main.js and preload.js to connect to TCP 127.0.0.1:5555.`);
+            }
+        } catch (err: any) {
+            setResults(`Execution Error:\n${err.message || err}`);
+        }
+    };
+
+    const fetchTables = async () => {
+        setTables(['Loading...']);
+        try {
+            if ((window as any).api && (window as any).api.queryDB) {
+                const response = await (window as any).api.queryDB('SHOW TABLES');
+                const lines = response.split('\n');
+                
+                // The DB returns tables formatted as "- tablename"
+                const parsedTables = lines
+                    .filter((l: string) => l.startsWith('- '))
+                    .map((l: string) => l.substring(2));
+                
+                setTables(parsedTables.length > 0 ? parsedTables : ['No tables found']);
+            } else {
+                setTables(['No IPC connection']);
+            }
+        } catch (err) {
+            setTables(['Failed to fetch']);
+        }
+    };
+
+    return (
+        <div className="main-content">
+            <aside className="sidebar">
+                <h3>Database</h3>
+                <ul id="table-list">
+                    {tables.map((table, i) => (
+                        <li key={i} onClick={() => {
+                            if (table !== 'Loading...' && table !== 'No IPC connection' && table !== 'No tables found' && table !== 'Failed to fetch') {
+                                setQuery(`SELECT * FROM ${table}`);
+                            }
+                        }}>
+                            {table}
+                        </li>
+                    ))}
+                </ul>
+                <button className="secondary-btn" onClick={fetchTables}>Refresh Tables</button>
+            </aside>
+            
+            <div className="workspace">
+                <div className="editor-section">
+                    <textarea 
+                        id="sql-editor" 
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Write your SQL query here...&#10;Example: SELECT * FROM users"
+                    />
+                    <div className="editor-actions">
+                        <button className="primary-btn" onClick={() => executeQuery(query)}>▶ Run Query</button>
+                        <button className="secondary-btn" onClick={() => setQuery('')}>Clear</button>
+                    </div>
+                </div>
+                
+                <div className="results-section">
+                    <div className="results-header">Output</div>
+                    <div className="results-container">
+                        <pre id="results-output" className={results.startsWith('Execution Error') ? 'output-error' : ''}>
+                            {results}
+                        </pre>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    );
 }
-
-export default App
