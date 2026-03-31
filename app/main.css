@@ -93,3 +93,45 @@
 
 #results-output { font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; font-size: 14px; line-height: 1.5; color: var(--success-color); }
 .output-error { color: var(--error-color) !important; }
+
+.auth-wrapper {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    width: min(520px, 100%);
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-card h2 {
+    margin: 0;
+}
+
+.auth-card p {
+    margin: 0 0 8px;
+    opacity: 0.8;
+    font-size: 14px;
+}
+
+.auth-input {
+    background-color: var(--sidebar-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+.auth-btn {
+    width: 100%;
+}
