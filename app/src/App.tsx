@@ -10,6 +10,8 @@ export default function App() {
     const [dbName, setDbName] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [isJsonPanelOpen, setJsonPanelOpen] = useState(false);
+    const [jsonResult, setJsonResult] = useState('');
 
     const runSql = async (sql: string): Promise<string> => {
         if (!(window as any).api || !(window as any).api.queryDB) {
@@ -25,10 +27,17 @@ export default function App() {
         }
         if (!sql.trim()) return;
         setResults('Executing Query...');
+        setJsonPanelOpen(false);
 
         try {
             const response = await runSql(sql);
-            setResults(response || '(No Output)');
+            if (sql.trim().toUpperCase().includes('AS JSON')) {
+                setJsonResult(response);
+                setJsonPanelOpen(true);
+                setResults('JSON data loaded in side panel.');
+            } else {
+                setResults(response || '(No Output)');
+            }
         } catch (err: any) {
             setResults(`Execution Error:\n${err.message || err}`);
         }
@@ -180,6 +189,17 @@ export default function App() {
                             {results}
                         </pre>
                     </div>
+                </div>
+            </div>
+            <div className={`json-panel ${isJsonPanelOpen ? 'open' : ''}`}>
+                <div className="json-header">
+                    <span>JSON Output</span>
+                    <button className="json-close-btn" onClick={() => setJsonPanelOpen(false)}>×</button>
+                </div>
+                <div className="results-container">
+                    <pre id="json-output">
+                        {jsonResult}
+                    </pre>
                 </div>
             </div>
         </div>

@@ -135,3 +135,48 @@
 .auth-btn {
     width: 100%;
 }
+
+.json-panel {
+    width: 0;
+    transition: width 0.3s ease-in-out;
+    background-color: var(--sidebar-bg);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.json-panel.open {
+    width: 400px;
+}
+
+.json-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: bold;
+    background-color: var(--panel-bg);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+.json-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#json-output {
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--success-color);
+}
